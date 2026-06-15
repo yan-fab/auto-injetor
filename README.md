@@ -1,32 +1,29 @@
 # Auto-Injetor 🤖🚀
 
-Um script avançado e universal para Tampermonkey que automatiza o avanço de aulas e resolve avaliações de forma inteligente em plataformas EAD modernas como Unicte, Noz e Cademi.
+An advanced and universal Tampermonkey script that automates lesson progress and intelligently solves assessments on modern E-Learning platforms like Unicte, Noz, and Cademi.
 
-## 🔥 Principais Funcionalidades
+## 🔥 Key Features
 
-- **Avanço Automático:** Detecta e pula aulas que já foram concluídas.
-- **Bypass de Vídeos (Iframes e Nativos):** Engana players de vídeo como Vimeo, YouTube e PandaVideo, simulando que o vídeo foi assistido até o fim de forma instantânea.
-- **Resolvedor de Provas Multi-Thread:** 
-  - Mapeia múltiplas questões em uma única tela.
-  - Para provas de Múltipla Escolha: Identifica gabaritos por cor (verde = certo, vermelho = tenta de novo) e aprende a resposta correta sozinho de forma assíncrona.
-  - Para Desafios de Checkbox: Utiliza força-bruta assíncrona para descobrir as combinações exatas em provas que exigem "múltiplas corretas".
-- **Escritor Fantasma:** Identifica caixas de texto dissertativas em avaliações e as preenche nativamente burlando bloqueios do React.
-- **Sistema de Radar 500ms:** Não depende de recarregamento de página. O robô reage em tempo real na arquitetura SPA (Single Page Application).
+- **Auto-Advance:** Detects and skips lessons that have already been completed.
+- **Video Bypass (Iframes and Native):** Bypasses video players like Vimeo, YouTube, and PandaVideo, instantly simulating that the video has been watched to the end.
+- **Multi-Threaded Quiz Solver:** 
+  - Maps multiple questions on a single screen.
+  - For Multiple-Choice quizzes: Identifies correct answers by color feedback (green = correct, red = try again) and learns the correct answer autonomously in an asynchronous way.
+  - For Checkbox Challenges: Uses asynchronous brute-force to discover the exact combinations in quizzes that require "multiple correct answers".
+- **Ghost Writer:** Identifies open-ended essay text boxes in assessments and fills them natively, bypassing React blocks.
+- **500ms Radar System:** Does not rely on page reloads. The bot reacts in real-time within the SPA (Single Page Application) architecture.
 
-## 📥 Como Instalar
+## 📥 How to Install
 
-1. Instale a extensão [Tampermonkey](https://www.tampermonkey.net/) no seu navegador.
-2. Crie um novo script.
-3. Copie todo o conteúdo do arquivo `auto-injetor.user.js` e cole no painel do Tampermonkey.
-4. Salve e ative o script.
+1. Install the [Tampermonkey](https://www.tampermonkey.net/) extension in your browser.
+2. Create a new script.
+3. Copy the entire content of the `auto-injetor.user.js` file and paste it into the Tampermonkey dashboard.
+4. Save and enable the script.
 
-## 🛠️ Tecnologias Suportadas
+## 🛠️ Supported Technologies
 
-- Plataformas SPA (React/Vue/Remix)
-- Domínios nativamente suportados no motor lógico de Quizzes: `unicte.com` e `appnoz.com.br`.
-
-## 🔒 Privacidade e Segurança
-Este script foi construído sem o uso de chaves privadas, e-mails, senhas ou tokens de identificação pessoal. Toda a sua operação ocorre de forma isolada na memória do navegador.
+- SPA Platforms (React/Vue/Remix)
+- Domains natively supported by the Quiz logic engine: `unicte.com` and `appnoz.com.br`.
 
 ---
-*Aviso: Este projeto foi criado com propósitos educacionais e de automação de testes.*
+*Disclaimer: This project was created for educational and test automation purposes.*
