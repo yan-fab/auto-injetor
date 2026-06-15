@@ -1,4 +1,4 @@
-# Auto-Injetor Universal Supremo 🤖🚀
+# Auto-Injetor 🤖🚀
 
 Um script avançado e universal para Tampermonkey que automatiza o avanço de aulas e resolve avaliações de forma inteligente em plataformas EAD modernas como Unicte, Noz e Cademi.
 
@@ -17,7 +17,7 @@ Um script avançado e universal para Tampermonkey que automatiza o avanço de au
 
 1. Instale a extensão [Tampermonkey](https://www.tampermonkey.net/) no seu navegador.
 2. Crie um novo script.
-3. Copie todo o conteúdo do arquivo `auto-injetor-supremo.user.js` e cole no painel do Tampermonkey.
+3. Copie todo o conteúdo do arquivo `auto-injetor.user.js` e cole no painel do Tampermonkey.
 4. Salve e ative o script.
 
 ## 🛠️ Tecnologias Suportadas

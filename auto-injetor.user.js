@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Auto-Injetor Universal Supremo
+// @name         Auto-Injetor
 // @namespace    http://tampermonkey.net/
 // @version      10.0
 // @description  Bypass de vídeos, resolvedor de provas de múltipla escolha e escritor fantasma para plataformas EAD (Unicte, Noz, Cademi).
