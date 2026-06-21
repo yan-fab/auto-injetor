@@ -25,5 +25,9 @@ An advanced and universal Tampermonkey script that automates lesson progress and
 - SPA Platforms (React/Vue/Remix)
 - Domains natively supported by the Quiz logic engine: `unicte.com` and `appnoz.com.br`.
 
+## 📝 License
+
+This project is licensed under the [MIT License](LICENSE).
+
 ---
 *Disclaimer: This project was created for educational and test automation purposes.*
