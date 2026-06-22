@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto-Injetor
 // @namespace    http://tampermonkey.net/
-// @version      14.0
+// @version      14.1
 // @description  Bypass de vídeos, resolvedor de provas de múltipla escolha e escritor fantasma para plataformas EAD (Unicte, Noz, Cademi, SpBIM).
 // @author       Você
 // @match        *://*/*
@@ -85,26 +85,34 @@
         const links = Array.from(document.querySelectorAll('a[href]'));
         const aulaLinks = links.filter(a => {
             const h = a.getAttribute('href');
-            return h && (h.includes('/curso/') || h.includes('/lesson/') || h.includes('/aula/'));
+            // Ignorar links vazios, links que rodam JS ou links que apenas abrem colapsos
+            if (!h || h === '#' || h.startsWith('javascript:')) return false;
+            // Deve conter o caminho de uma aula, não apenas um módulo/categoria
+            return (h.includes('/curso/') || h.includes('/lesson/') || h.includes('/aula/'));
         });
         
         let currentIndex = -1;
         for (let i = 0; i < aulaLinks.length; i++) {
-            if (aulaLinks[i].href === window.location.href || aulaLinks[i].getAttribute('href') === window.location.pathname) {
+            // Checar se o link atual corresponde à página inteira ou apenas o caminho (pathname)
+            if (aulaLinks[i].href === window.location.href || window.location.href.includes(aulaLinks[i].href) || aulaLinks[i].getAttribute('href') === window.location.pathname) {
                 currentIndex = i;
+                // Preferir o último link correspondente para evitar loops se houver links repetidos no menu
             }
         }
         
         if (currentIndex !== -1 && currentIndex + 1 < aulaLinks.length) {
             const nextLink = aulaLinks[currentIndex + 1];
             if (nextLink.href !== window.location.href) {
-                console.log("⏩ Próxima aula encontrada na barra lateral! Avançando...");
+                console.log("⏩ Próxima aula encontrada na barra lateral! Avançando para:", nextLink.href);
                 mudandoDePagina = true;
                 setTimeout(() => { mudandoDePagina = false; }, 5000);
                 localStorage.removeItem('quiz_bot_state_' + window.location.pathname);
                 nextLink.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                setTimeout(() => nextLink.click(), 500);
-                return true;
+                // Clicar apenas se o elemento for realmente visível e interativo
+                if (window.getComputedStyle(nextLink).display !== 'none') {
+                    setTimeout(() => nextLink.click(), 500);
+                    return true;
+                }
             }
         }
 
