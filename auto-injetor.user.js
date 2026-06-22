@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto-Injetor
 // @namespace    http://tampermonkey.net/
-// @version      14.3
+// @version      14.4
 // @description  Bypass de vídeos, resolvedor de provas de múltipla escolha e escritor fantasma para plataformas EAD (Unicte, Noz, Cademi, SpBIM).
 // @author       Você
 // @match        *://*/*
@@ -17,21 +17,26 @@
     // ==========================================
     // INTERCEPTADOR DE REDE (MÁQUINA DO TEMPO)
     // ==========================================
+    const adulterarPayload = (json) => {
+        let alterou = false;
+        const camposTempo = ['time', 'duration', 'time_spent', 'tempo', 'currentTime', 'watchTime', 'watched', 'play_time', 'played'];
+        camposTempo.forEach(c => { if (json[c] !== undefined) { json[c] = 3600; alterou = true; } });
+        
+        const camposPorcentagem = ['progress', 'percentage', 'percent', 'completed'];
+        camposPorcentagem.forEach(c => { if (json[c] !== undefined && typeof json[c] === 'number') { json[c] = (json[c] <= 1 ? 1 : 100); alterou = true; } });
+        
+        return alterou;
+    };
+
     const originalFetch = window.fetch;
     window.fetch = async function() {
         let args = arguments;
         if (args[1] && args[1].body && typeof args[1].body === 'string') {
             try {
                 let json = JSON.parse(args[1].body);
-                let alterou = false;
-                if (json.time !== undefined) { json.time = 3600; alterou = true; }
-                if (json.duration !== undefined) { json.duration = 3600; alterou = true; }
-                if (json.time_spent !== undefined) { json.time_spent = 3600; alterou = true; }
-                if (json.tempo !== undefined) { json.tempo = 3600; alterou = true; }
-                
-                if (alterou) {
+                if (adulterarPayload(json)) {
                     args[1].body = JSON.stringify(json);
-                    console.log("⏳ [Máquina do Tempo] Tempo adulterado para 3600s no Fetch!");
+                    console.log("⏳ [Máquina do Tempo] Payload adulterado no Fetch!");
                 }
             } catch(e) {}
         }
@@ -43,15 +48,9 @@
         if (body && typeof body === 'string') {
             try {
                 let json = JSON.parse(body);
-                let alterou = false;
-                if (json.time !== undefined) { json.time = 3600; alterou = true; }
-                if (json.duration !== undefined) { json.duration = 3600; alterou = true; }
-                if (json.time_spent !== undefined) { json.time_spent = 3600; alterou = true; }
-                if (json.tempo !== undefined) { json.tempo = 3600; alterou = true; }
-                
-                if (alterou) {
+                if (adulterarPayload(json)) {
                     body = JSON.stringify(json);
-                    console.log("⏳ [Máquina do Tempo] Tempo adulterado para 3600s no XHR!");
+                    console.log("⏳ [Máquina do Tempo] Payload adulterado no XHR!");
                 }
             } catch(e) {}
         }
@@ -161,7 +160,7 @@
     // INJEÇÃO DE VÍDEOS (COMUM)
     // ==========================================
     setTimeout(() => {
-        console.log("🤖 [Tampermonkey] Iniciando Escritor Fantasma (V14.3)...");
+        console.log("🤖 [Tampermonkey] Iniciando Escritor Fantasma (V14.4)...");
 
         const botoesProgresso = Array.from(document.querySelectorAll('a.progresso-click'));
         if (botoesProgresso.some(btn => btn.classList.contains('progresso-realizado') || btn.textContent.toLowerCase().includes('desmarcar'))) { irParaProximaAula(); return; }
@@ -220,8 +219,35 @@
                 }
             });
         } catch(e) {}
+        
+        // =====================================================
+        // BYPASS DE MINUTOS DE VÍDEO (Pula para 99% do vídeo)
+        // =====================================================
+        try {
+            document.querySelectorAll('video').forEach(v => {
+                if (!v.paused && v.duration > 0 && v.currentTime < v.duration - 2) {
+                    v.playbackRate = 16.0; 
+                    v.currentTime = v.duration - 1; // Deixa rolar 1 segundo final pra registrar "ended"
+                    console.log("⏩ [Bypass de Vídeo] Tempo avançado para o final!");
+                }
+            });
+        } catch(e) {}
+
         if (mudandoDePagina) return; 
-        if (!window.location.hostname.includes('unicte.com') && !window.location.hostname.includes('appnoz.com.br') && !window.location.hostname.includes('spbim.com.br')) return; 
+        if (!window.location.hostname.includes('unicte.com') && !window.location.hostname.includes('appnoz.com.br') && !window.location.hostname.includes('spbim.com.br') && window === window.top) return; 
+
+        // -----------------------------------------------------
+        // MODAL DE AVALIAÇÃO / PULAR (NOVA TELA)
+        // -----------------------------------------------------
+        const btnPular = Array.from(document.querySelectorAll('button, a')).find(b => {
+            const txt = b.textContent.toLowerCase().trim();
+            return txt === 'pular' || txt === 'avaliar e avançar' || txt === 'avaliar e avancar';
+        });
+        if (btnPular && window.getComputedStyle(btnPular).display !== 'none' && !btnPular.disabled) {
+            console.log("🌟 Modal de avaliação detectado! Pulando...");
+            btnPular.click();
+            return;
+        }
 
         // -----------------------------------------------------
         // MARCAR CONCLUÍDA (NATIVO SPBIM E OUTROS)
