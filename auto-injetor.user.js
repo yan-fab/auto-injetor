@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto-Injetor
 // @namespace    http://tampermonkey.net/
-// @version      14.1
+// @version      14.2
 // @description  Bypass de vídeos, resolvedor de provas de múltipla escolha e escritor fantasma para plataformas EAD (Unicte, Noz, Cademi, SpBIM).
 // @author       Você
 // @match        *://*/*
@@ -82,37 +82,80 @@
         }
 
         // Tentar avançar pela barra lateral se não tiver botão próximo (Ex: SpBIM)
-        const links = Array.from(document.querySelectorAll('a[href]'));
+        const sidebarContainer = document.querySelector('aside, [class*="sidebar"], [class*="menu"], [class*="playlist"]') || document.body;
+        const links = Array.from(sidebarContainer.querySelectorAll('a[href]'));
+        
         const aulaLinks = links.filter(a => {
             const h = a.getAttribute('href');
-            // Ignorar links vazios, links que rodam JS ou links que apenas abrem colapsos
             if (!h || h === '#' || h.startsWith('javascript:')) return false;
-            // Deve conter o caminho de uma aula, não apenas um módulo/categoria
-            return (h.includes('/curso/') || h.includes('/lesson/') || h.includes('/aula/'));
+            
+            // Tem que ter um link de aula real
+            const isLessonLink = h.includes('/curso/') || h.includes('/lesson/') || h.includes('/aula/') || h.includes('/module/');
+            if (!isLessonLink) return false;
+            
+            // Ignorar cabecalhos de módulos
+            const txt = a.textContent.toLowerCase();
+            if (txt.includes('módulo') || txt.includes('modulo') || txt.includes('trilha')) return false;
+            
+            return true;
         });
         
+        if (aulaLinks.length === 0) return false;
+
         let currentIndex = -1;
+        
+        // Estratégia 1: Classes ativas
         for (let i = 0; i < aulaLinks.length; i++) {
-            // Checar se o link atual corresponde à página inteira ou apenas o caminho (pathname)
-            if (aulaLinks[i].href === window.location.href || window.location.href.includes(aulaLinks[i].href) || aulaLinks[i].getAttribute('href') === window.location.pathname) {
+            const classes = aulaLinks[i].className.toLowerCase();
+            if (classes.includes('active') || classes.includes('current') || aulaLinks[i].getAttribute('aria-current') === 'page') {
                 currentIndex = i;
-                // Preferir o último link correspondente para evitar loops se houver links repetidos no menu
+            }
+        }
+        
+        // Estratégia 2: Matching de URL
+        if (currentIndex === -1) {
+            for (let i = 0; i < aulaLinks.length; i++) {
+                if (aulaLinks[i].href === window.location.href || window.location.href.endsWith(aulaLinks[i].getAttribute('href'))) {
+                    currentIndex = i;
+                }
+            }
+        }
+        
+        // Estratégia 3: Titulos na tela (h1, h2) batendo com o link da barra lateral
+        if (currentIndex === -1) {
+            const titulos = Array.from(document.querySelectorAll('h1, h2')).map(h => h.textContent.trim().toLowerCase()).filter(t => t.length > 4);
+            for (let i = 0; i < aulaLinks.length; i++) {
+                const linkTxt = aulaLinks[i].textContent.trim().toLowerCase();
+                if (titulos.some(t => linkTxt.includes(t) || t.includes(linkTxt))) {
+                    currentIndex = i;
+                }
             }
         }
         
         if (currentIndex !== -1 && currentIndex + 1 < aulaLinks.length) {
             const nextLink = aulaLinks[currentIndex + 1];
             if (nextLink.href !== window.location.href) {
-                console.log("⏩ Próxima aula encontrada na barra lateral! Avançando para:", nextLink.href);
+                console.log("⏩ Próxima aula encontrada na barra lateral! Clicando no index:", currentIndex + 1);
                 mudandoDePagina = true;
                 setTimeout(() => { mudandoDePagina = false; }, 5000);
                 localStorage.removeItem('quiz_bot_state_' + window.location.pathname);
+                
                 nextLink.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                // Clicar apenas se o elemento for realmente visível e interativo
-                if (window.getComputedStyle(nextLink).display !== 'none') {
-                    setTimeout(() => nextLink.click(), 500);
-                    return true;
-                }
+                
+                setTimeout(() => {
+                    // Tentar clique nativo
+                    nextLink.click();
+                    
+                    // Disparar eventos de mouse pra framework SPA (React/Vue/Inertia)
+                    nextLink.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
+                    nextLink.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
+                    
+                    // Se o link for um contêiner e tiver elementos dentro, clicar neles também
+                    if (nextLink.children.length > 0) {
+                        try { nextLink.children[0].click(); } catch(e){}
+                    }
+                }, 500);
+                return true;
             }
         }
 
@@ -123,7 +166,7 @@
     // INJEÇÃO DE VÍDEOS (COMUM)
     // ==========================================
     setTimeout(() => {
-        console.log("🤖 [Tampermonkey] Iniciando Escritor Fantasma (V14.0)...");
+        console.log("🤖 [Tampermonkey] Iniciando Escritor Fantasma (V14.2)...");
 
         const botoesProgresso = Array.from(document.querySelectorAll('a.progresso-click'));
         if (botoesProgresso.some(btn => btn.classList.contains('progresso-realizado') || btn.textContent.toLowerCase().includes('desmarcar'))) { irParaProximaAula(); return; }
