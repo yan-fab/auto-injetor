@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto-Injetor
 // @namespace    http://tampermonkey.net/
-// @version      14.4
+// @version      14.5
 // @description  Bypass de vídeos, resolvedor de provas de múltipla escolha e escritor fantasma para plataformas EAD (Unicte, Noz, Cademi, SpBIM).
 // @author       Você
 // @match        *://*/*
@@ -75,7 +75,7 @@
             
             localStorage.removeItem('quiz_bot_state_' + window.location.pathname);
 
-            btnSeguir.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (!window.location.hostname.includes('spbim.com.br')) btnSeguir.scrollIntoView({ behavior: 'smooth', block: 'center' });
             setTimeout(() => btnSeguir.click(), 500);
             return true;
         }
@@ -139,7 +139,7 @@
                 setTimeout(() => { mudandoDePagina = false; }, 5000);
                 localStorage.removeItem('quiz_bot_state_' + window.location.pathname);
                 
-                nextLink.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (!window.location.hostname.includes('spbim.com.br')) nextLink.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 
                 setTimeout(() => {
                     console.log("🚀 Forçando navegação absoluta (Bypass SPA)...");
@@ -160,7 +160,7 @@
     // INJEÇÃO DE VÍDEOS (COMUM)
     // ==========================================
     setTimeout(() => {
-        console.log("🤖 [Tampermonkey] Iniciando Escritor Fantasma (V14.4)...");
+        console.log("🤖 [Tampermonkey] Iniciando Escritor Fantasma (V14.5)...");
 
         const botoesProgresso = Array.from(document.querySelectorAll('a.progresso-click'));
         if (botoesProgresso.some(btn => btn.classList.contains('progresso-realizado') || btn.textContent.toLowerCase().includes('desmarcar'))) { irParaProximaAula(); return; }
@@ -210,15 +210,17 @@
     // ==========================================
     setInterval(() => {
         // Auto-scroll PDF / Elementos de Texto
-        try {
-            document.querySelectorAll('div, iframe').forEach(el => {
-                if (el.tagName === 'IFRAME') {
-                    try { el.contentWindow.scrollTo(0, 999999); } catch(e) {}
-                } else if (el.scrollHeight > el.clientHeight && !el.classList.contains('no-scroll')) {
-                    el.scrollTop = el.scrollHeight;
-                }
-            });
-        } catch(e) {}
+        if (!window.location.hostname.includes('spbim.com.br')) {
+            try {
+                document.querySelectorAll('div, iframe').forEach(el => {
+                    if (el.tagName === 'IFRAME') {
+                        try { el.contentWindow.scrollTo(0, 999999); } catch(e) {}
+                    } else if (el.scrollHeight > el.clientHeight && !el.classList.contains('no-scroll')) {
+                        el.scrollTop = el.scrollHeight;
+                    }
+                });
+            } catch(e) {}
+        }
         
         // =====================================================
         // BYPASS DE MINUTOS DE VÍDEO (Pula para 99% do vídeo)
@@ -321,7 +323,7 @@
             });
             if (btnRevelar && window.getComputedStyle(btnRevelar).display !== 'none') {
                 console.log("🔓 Botão de Revelar detectado. Clicando...");
-                btnRevelar.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (!window.location.hostname.includes('spbim.com.br')) btnRevelar.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 btnRevelar.click();
             }
             return; 
@@ -376,7 +378,7 @@
                 }
 
                 if (btnReiniciar && window.getComputedStyle(btnReiniciar).display !== 'none') {
-                    btnReiniciar.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    if (!window.location.hostname.includes('spbim.com.br')) btnReiniciar.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     btnReiniciar.click();
                 }
             }
@@ -446,7 +448,7 @@
                 });
 
                 if (btnConfirmar && !btnConfirmar.disabled) {
-                    btnConfirmar.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    if (!window.location.hostname.includes('spbim.com.br')) btnConfirmar.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     btnConfirmar.click();
                 }
                 
