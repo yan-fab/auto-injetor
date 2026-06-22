@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Auto-Injetor
 // @namespace    http://tampermonkey.net/
-// @version      10.0
-// @description  Bypass de vídeos, resolvedor de provas de múltipla escolha e escritor fantasma para plataformas EAD (Unicte, Noz, Cademi).
+// @version      12.0
+// @description  Bypass de vídeos, resolvedor de provas de múltipla escolha e escritor fantasma para plataformas EAD (Unicte, Noz, Cademi, SpBIM).
 // @author       Você
 // @match        *://*/*
 // @grant        none
@@ -63,7 +63,7 @@
 
         botoesProgresso.forEach(btn => { if (btn.textContent.toLowerCase().includes('marcar')) btn.click(); });
 
-        if (!window.location.hostname.includes('unicte.com') && !window.location.hostname.includes('appnoz.com.br')) {
+        if (!window.location.hostname.includes('unicte.com') && !window.location.hostname.includes('appnoz.com.br') && !window.location.hostname.includes('spbim.com.br')) {
             let tentativasChat = 0;
             const monitorDeSaida = setInterval(() => {
                 const chatwoot = document.getElementById('cw-bubble-holder');
@@ -93,7 +93,7 @@
     // ==========================================
     setInterval(() => {
         if (mudandoDePagina) return; 
-        if (!window.location.hostname.includes('unicte.com') && !window.location.hostname.includes('appnoz.com.br')) return; 
+        if (!window.location.hostname.includes('unicte.com') && !window.location.hostname.includes('appnoz.com.br') && !window.location.hostname.includes('spbim.com.br')) return; 
         if (irParaProximaAula()) return;
 
         // -----------------------------------------------------

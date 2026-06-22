@@ -1,6 +1,6 @@
 # Auto-Injetor 🤖🚀
 
-An advanced and universal Tampermonkey script that automates lesson progress and intelligently solves assessments on modern E-Learning platforms like Unicte, Noz, and Cademi.
+An advanced and universal Tampermonkey script that automates lesson progress and intelligently solves assessments on modern E-Learning platforms like Unicte, Noz, Cademi, and SpBIM.
 
 ## 🔥 Key Features
 
@@ -23,7 +23,7 @@ An advanced and universal Tampermonkey script that automates lesson progress and
 ## 🛠️ Supported Technologies
 
 - SPA Platforms (React/Vue/Remix)
-- Domains natively supported by the Quiz logic engine: `unicte.com` and `appnoz.com.br`.
+- Domains natively supported by the Quiz logic engine: `unicte.com`, `appnoz.com.br`, and `spbim.com.br`.
 
 ## 📝 License
 
