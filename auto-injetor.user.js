@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto-Injetor
 // @namespace    http://tampermonkey.net/
-// @version      13.0
+// @version      14.0
 // @description  Bypass de vídeos, resolvedor de provas de múltipla escolha e escritor fantasma para plataformas EAD (Unicte, Noz, Cademi, SpBIM).
 // @author       Você
 // @match        *://*/*
@@ -65,7 +65,7 @@
         const btnProximoCademi = document.querySelector('a.a-next');
         const botoesGenericos = Array.from(document.querySelectorAll('a, button')).filter(b => {
             const txt = b.textContent.toLowerCase().trim();
-            return txt.includes('próxim') || txt.includes('avanç') || txt === 'seguir' || txt.includes('seguir ') || txt.includes('frente') || txt.includes('continuar') || txt.includes('conclu');
+            return txt.includes('próxim') || txt.includes('avanç') || txt === 'seguir' || txt.includes('seguir ') || txt.includes('frente') || txt.includes('continuar');
         });
         const btnSeguir = btnProximoCademi || botoesGenericos[0];
 
@@ -80,6 +80,34 @@
             setTimeout(() => btnSeguir.click(), 500);
             return true;
         }
+
+        // Tentar avançar pela barra lateral se não tiver botão próximo (Ex: SpBIM)
+        const links = Array.from(document.querySelectorAll('a[href]'));
+        const aulaLinks = links.filter(a => {
+            const h = a.getAttribute('href');
+            return h && (h.includes('/curso/') || h.includes('/lesson/') || h.includes('/aula/'));
+        });
+        
+        let currentIndex = -1;
+        for (let i = 0; i < aulaLinks.length; i++) {
+            if (aulaLinks[i].href === window.location.href || aulaLinks[i].getAttribute('href') === window.location.pathname) {
+                currentIndex = i;
+            }
+        }
+        
+        if (currentIndex !== -1 && currentIndex + 1 < aulaLinks.length) {
+            const nextLink = aulaLinks[currentIndex + 1];
+            if (nextLink.href !== window.location.href) {
+                console.log("⏩ Próxima aula encontrada na barra lateral! Avançando...");
+                mudandoDePagina = true;
+                setTimeout(() => { mudandoDePagina = false; }, 5000);
+                localStorage.removeItem('quiz_bot_state_' + window.location.pathname);
+                nextLink.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => nextLink.click(), 500);
+                return true;
+            }
+        }
+
         return false;
     };
 
@@ -87,7 +115,7 @@
     // INJEÇÃO DE VÍDEOS (COMUM)
     // ==========================================
     setTimeout(() => {
-        console.log("🤖 [Tampermonkey] Iniciando Escritor Fantasma (V13.0)...");
+        console.log("🤖 [Tampermonkey] Iniciando Escritor Fantasma (V14.0)...");
 
         const botoesProgresso = Array.from(document.querySelectorAll('a.progresso-click'));
         if (botoesProgresso.some(btn => btn.classList.contains('progresso-realizado') || btn.textContent.toLowerCase().includes('desmarcar'))) { irParaProximaAula(); return; }
@@ -148,6 +176,20 @@
         } catch(e) {}
         if (mudandoDePagina) return; 
         if (!window.location.hostname.includes('unicte.com') && !window.location.hostname.includes('appnoz.com.br') && !window.location.hostname.includes('spbim.com.br')) return; 
+
+        // -----------------------------------------------------
+        // MARCAR CONCLUÍDA (NATIVO SPBIM E OUTROS)
+        // -----------------------------------------------------
+        const btnMarcar = Array.from(document.querySelectorAll('button, a')).find(b => {
+            const txt = b.textContent.toLowerCase().trim();
+            return txt === 'marcar concluída' || txt === 'marcar como concluída' || txt === 'marcar como concluído';
+        });
+        if (btnMarcar && !btnMarcar.disabled && window.getComputedStyle(btnMarcar).display !== 'none') {
+            console.log("✔️ Marcando aula como concluída...");
+            btnMarcar.click();
+            return; 
+        }
+
         if (irParaProximaAula()) return;
 
         // -----------------------------------------------------
