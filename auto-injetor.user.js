@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto-Injetor
 // @namespace    http://tampermonkey.net/
-// @version      14.2
+// @version      14.3
 // @description  Bypass de vídeos, resolvedor de provas de múltipla escolha e escritor fantasma para plataformas EAD (Unicte, Noz, Cademi, SpBIM).
 // @author       Você
 // @match        *://*/*
@@ -143,16 +143,11 @@
                 nextLink.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 
                 setTimeout(() => {
-                    // Tentar clique nativo
-                    nextLink.click();
-                    
-                    // Disparar eventos de mouse pra framework SPA (React/Vue/Inertia)
-                    nextLink.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
-                    nextLink.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
-                    
-                    // Se o link for um contêiner e tiver elementos dentro, clicar neles também
-                    if (nextLink.children.length > 0) {
-                        try { nextLink.children[0].click(); } catch(e){}
+                    console.log("🚀 Forçando navegação absoluta (Bypass SPA)...");
+                    if (nextLink.href && nextLink.href.startsWith('http')) {
+                        window.location.href = nextLink.href;
+                    } else {
+                        nextLink.click();
                     }
                 }, 500);
                 return true;
@@ -166,7 +161,7 @@
     // INJEÇÃO DE VÍDEOS (COMUM)
     // ==========================================
     setTimeout(() => {
-        console.log("🤖 [Tampermonkey] Iniciando Escritor Fantasma (V14.2)...");
+        console.log("🤖 [Tampermonkey] Iniciando Escritor Fantasma (V14.3)...");
 
         const botoesProgresso = Array.from(document.querySelectorAll('a.progresso-click'));
         if (botoesProgresso.some(btn => btn.classList.contains('progresso-realizado') || btn.textContent.toLowerCase().includes('desmarcar'))) { irParaProximaAula(); return; }
