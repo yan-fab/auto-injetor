@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto-Injetor
 // @namespace    http://tampermonkey.net/
-// @version      14.5
+// @version      14.6
 // @description  Bypass de vídeos, resolvedor de provas de múltipla escolha e escritor fantasma para plataformas EAD (Unicte, Noz, Cademi, SpBIM).
 // @author       Você
 // @match        *://*/*
@@ -81,6 +81,11 @@
         }
 
         // Tentar avançar pela barra lateral se não tiver botão próximo (Ex: SpBIM)
+        if (window.location.hostname.includes('spbim.com.br')) {
+            console.log("⏸️ Ignorando barra lateral na SpBIM (avanço será via Modal Pular).");
+            return false;
+        }
+        
         const sidebarContainer = document.querySelector('aside, [class*="sidebar"], [class*="menu"], [class*="playlist"]') || document.body;
         const links = Array.from(sidebarContainer.querySelectorAll('a[href]'));
         
@@ -160,7 +165,7 @@
     // INJEÇÃO DE VÍDEOS (COMUM)
     // ==========================================
     setTimeout(() => {
-        console.log("🤖 [Tampermonkey] Iniciando Escritor Fantasma (V14.5)...");
+        console.log("🤖 [Tampermonkey] Iniciando Escritor Fantasma (V14.6)...");
 
         const botoesProgresso = Array.from(document.querySelectorAll('a.progresso-click'));
         if (botoesProgresso.some(btn => btn.classList.contains('progresso-realizado') || btn.textContent.toLowerCase().includes('desmarcar'))) { irParaProximaAula(); return; }
