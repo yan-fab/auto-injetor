@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto-Injetor
 // @namespace    http://tampermonkey.net/
-// @version      12.0
+// @version      13.0
 // @description  Bypass de vídeos, resolvedor de provas de múltipla escolha e escritor fantasma para plataformas EAD (Unicte, Noz, Cademi, SpBIM).
 // @author       Você
 // @match        *://*/*
@@ -15,13 +15,57 @@
     let aguardandoResultado = false;
 
     // ==========================================
+    // INTERCEPTADOR DE REDE (MÁQUINA DO TEMPO)
+    // ==========================================
+    const originalFetch = window.fetch;
+    window.fetch = async function() {
+        let args = arguments;
+        if (args[1] && args[1].body && typeof args[1].body === 'string') {
+            try {
+                let json = JSON.parse(args[1].body);
+                let alterou = false;
+                if (json.time !== undefined) { json.time = 3600; alterou = true; }
+                if (json.duration !== undefined) { json.duration = 3600; alterou = true; }
+                if (json.time_spent !== undefined) { json.time_spent = 3600; alterou = true; }
+                if (json.tempo !== undefined) { json.tempo = 3600; alterou = true; }
+                
+                if (alterou) {
+                    args[1].body = JSON.stringify(json);
+                    console.log("⏳ [Máquina do Tempo] Tempo adulterado para 3600s no Fetch!");
+                }
+            } catch(e) {}
+        }
+        return originalFetch.apply(this, args);
+    };
+
+    const originalXHR = XMLHttpRequest.prototype.send;
+    XMLHttpRequest.prototype.send = function(body) {
+        if (body && typeof body === 'string') {
+            try {
+                let json = JSON.parse(body);
+                let alterou = false;
+                if (json.time !== undefined) { json.time = 3600; alterou = true; }
+                if (json.duration !== undefined) { json.duration = 3600; alterou = true; }
+                if (json.time_spent !== undefined) { json.time_spent = 3600; alterou = true; }
+                if (json.tempo !== undefined) { json.tempo = 3600; alterou = true; }
+                
+                if (alterou) {
+                    body = JSON.stringify(json);
+                    console.log("⏳ [Máquina do Tempo] Tempo adulterado para 3600s no XHR!");
+                }
+            } catch(e) {}
+        }
+        originalXHR.call(this, body);
+    };
+
+    // ==========================================
     // FUNÇÃO UNIVERSAL DE AVANÇO
     // ==========================================
     const irParaProximaAula = () => {
         const btnProximoCademi = document.querySelector('a.a-next');
         const botoesGenericos = Array.from(document.querySelectorAll('a, button')).filter(b => {
             const txt = b.textContent.toLowerCase().trim();
-            return txt.includes('próxim') || txt.includes('avanç') || txt === 'seguir' || txt.includes('seguir ') || txt.includes('frente') || txt.includes('continuar') || txt.includes('concluir');
+            return txt.includes('próxim') || txt.includes('avanç') || txt === 'seguir' || txt.includes('seguir ') || txt.includes('frente') || txt.includes('continuar') || txt.includes('conclu');
         });
         const btnSeguir = btnProximoCademi || botoesGenericos[0];
 
@@ -43,7 +87,7 @@
     // INJEÇÃO DE VÍDEOS (COMUM)
     // ==========================================
     setTimeout(() => {
-        console.log("🤖 [Tampermonkey] Iniciando Escritor Fantasma (V10.0)...");
+        console.log("🤖 [Tampermonkey] Iniciando Escritor Fantasma (V13.0)...");
 
         const botoesProgresso = Array.from(document.querySelectorAll('a.progresso-click'));
         if (botoesProgresso.some(btn => btn.classList.contains('progresso-realizado') || btn.textContent.toLowerCase().includes('desmarcar'))) { irParaProximaAula(); return; }
@@ -92,6 +136,16 @@
     // RADAR CENTRAL DE RESOLUÇÃO
     // ==========================================
     setInterval(() => {
+        // Auto-scroll PDF / Elementos de Texto
+        try {
+            document.querySelectorAll('div, iframe').forEach(el => {
+                if (el.tagName === 'IFRAME') {
+                    try { el.contentWindow.scrollTo(0, 999999); } catch(e) {}
+                } else if (el.scrollHeight > el.clientHeight && !el.classList.contains('no-scroll')) {
+                    el.scrollTop = el.scrollHeight;
+                }
+            });
+        } catch(e) {}
         if (mudandoDePagina) return; 
         if (!window.location.hostname.includes('unicte.com') && !window.location.hostname.includes('appnoz.com.br') && !window.location.hostname.includes('spbim.com.br')) return; 
         if (irParaProximaAula()) return;
